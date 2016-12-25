@@ -1,0 +1,15 @@
+{
+  "name": "babel-loader-builder",
+  "version": "0.0.2",
+  "description": "Build babel loader with defaults as an object or string",
+  "main": "src/index.js",
+  "files": [
+    "src"
+  ],
+  "author": "aretecode",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/aretecode/babel-loader-builder.git"
+  }
+}
