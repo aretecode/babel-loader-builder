@@ -14,6 +14,8 @@ module.exports = function(options) {
     moduleExports: true,
     inferno: false,
     stage: '0',
+    plugins: [],
+    presets: [],
   }
   options = Object.assign(defaults, options)
 
@@ -23,7 +25,7 @@ module.exports = function(options) {
 
     // https://babeljs.io/docs/plugins/preset-stage-0/
     // all presets from stage 1-3
-  ]
+  ].concat(options.presets)
   var plugins = [
     'transform-runtime',
 
@@ -40,18 +42,27 @@ module.exports = function(options) {
     // @decorator
     'transform-decorators-legacy',
 
-    // @ flow
-    'transform-flow-strip-types',
-
-    // react
-    'transform-react-jsx',
-
     // supported by webpack2 already
     // 'transform-es2015-modules-commonjs',
-  ]
+  ].concat(options.plugins)
 
-  if (!options.stage.includes('stage')) options.stage = 'stage-' + options.stage
+  // default
+  if (!options.stage.includes('stage')) {
+    options.stage = 'stage-' + options.stage
+  }
   presets.push(options.stage)
+
+  if (options.stripFlow) {
+    plugins.push('transform-flow-strip-types')
+  }
+  if (options.flowRuntime) {
+    // defaults
+    // {
+    //   'assert': true,
+    //   'decorate': true,
+    // }
+    plugins.push('flow-runtime')
+  }
 
   if (options.moduleExports) {
     // for .default handling
@@ -60,6 +71,7 @@ module.exports = function(options) {
 
   if (options.react) {
     presets.push('react')
+    plugins.push('transform-react-jsx')
   }
   if (options.hot) {
     plugins.push('react-hot-loader/babel')
@@ -67,14 +79,11 @@ module.exports = function(options) {
   }
 
   // babel minifier
-  if (options.production || options.babili) {
+  if (options.babili) {
     presets.push('babili')
   }
 
-  if (options.asObject) {
-    return {plugins, presets}
-  }
-
+  // @TODO: inferno & inferno-compat
   if (options.inferno) {
     // presets.push('inferno')
     plugins.push('inferno')
@@ -84,10 +93,14 @@ module.exports = function(options) {
         'react': 'inferno-compat',
         'react-dom': 'inferno-compat',
         'react-dom/server': 'inferno-compat',
+        'inferno': 'inferno-compat',
       },
     }])
   }
 
+  if (options.asObject) {
+    return {plugins, presets}
+  }
 
   presets = 'presets[]=' + presets.join(',presets[]=')
   plugins = ',plugins[]=' + plugins.join(',plugins[]=')
