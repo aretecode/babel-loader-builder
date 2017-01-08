@@ -13,6 +13,8 @@ module.exports = function(options) {
     babili: false,
     moduleExports: true,
     inferno: false,
+    async: true,
+    decorators: true,
     stage: '0',
     plugins: [],
     presets: [],
@@ -26,25 +28,32 @@ module.exports = function(options) {
     // https://babeljs.io/docs/plugins/preset-stage-0/
     // all presets from stage 1-3
   ].concat(options.presets)
+
   var plugins = [
-    'transform-runtime',
-
-     // async
-    'transform-regenerator',
-    'transform-async-to-generator',
-
     // es7 props
     'transform-class-properties',
 
     // {...props}
     'transform-object-rest-spread',
 
-    // @decorator
-    'transform-decorators-legacy',
-
     // supported by webpack2 already
     // 'transform-es2015-modules-commonjs',
   ].concat(options.plugins)
+
+  // @decorator
+  if (options.decorators) {
+    plugins.push('transform-decorators-legacy')
+  }
+
+  if (options.async) {
+    plugins.push('transform-runtime')
+    plugins.push('transform-regenerator')
+    plugins.push('transform-async-to-generator')
+  }
+  if (options.asyncToPromise) {
+    plugins.push('async-to-promises')
+  }
+
 
   // default
   if (!options.stage.includes('stage')) {
@@ -71,8 +80,11 @@ module.exports = function(options) {
 
   if (options.react) {
     presets.push('react')
+  }
+  if (options.reactjsx) {
     plugins.push('transform-react-jsx')
   }
+
   if (options.hot) {
     plugins.push('react-hot-loader/babel')
     presets.push('react-hmre')
@@ -99,7 +111,14 @@ module.exports = function(options) {
   }
 
   if (options.asObject) {
-    return {plugins, presets}
+    var asObject = {plugins, presets}
+    if (!options.babelrc) {
+      asObject.babelrc = false
+    }
+    if (options.cacheDirectory) {
+      asObject.cacheDirectory = true
+    }
+    return asObject
   }
 
   presets = 'presets[]=' + presets.join(',presets[]=')

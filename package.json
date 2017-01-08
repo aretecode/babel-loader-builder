@@ -1,6 +1,6 @@
 {
   "name": "babel-loader-builder",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Build babel loader with defaults as an object or string",
   "main": "src/index.js",
   "files": [
@@ -34,6 +34,8 @@
     "babel-preset-react-hmre": "^1.1.1",
     "babel-preset-stage-0": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
-    "babel-preset-stage-3": "^6.17.0"
+    "babel-preset-stage-3": "^6.17.0",
+    "react-hot-loader": "3.0.0-beta.0",
+    "babel-plugin-async-to-promises": "^1.0.5"
   }
 }
