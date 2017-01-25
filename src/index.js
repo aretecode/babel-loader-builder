@@ -4,6 +4,7 @@
  */
 module.exports = function(options) {
   var defaults = {
+    es2015: true,
     hot: false,
     react: false,
     asObject: false,
@@ -15,6 +16,8 @@ module.exports = function(options) {
     inferno: false,
     async: true,
     decorators: true,
+    classProperties: true,
+    objectSpread: true,
     stage: '0',
     plugins: [],
     presets: [],
@@ -22,29 +25,25 @@ module.exports = function(options) {
   options = Object.assign(defaults, options)
 
   var presets = [
-    // 'es2015-webpack2',
-    'es2015',
-
     // https://babeljs.io/docs/plugins/preset-stage-0/
     // all presets from stage 1-3
   ].concat(options.presets)
 
   var plugins = [
-    // es7 props
-    'transform-class-properties',
-
-    // {...props}
-    'transform-object-rest-spread',
-
     // supported by webpack2 already
     // 'transform-es2015-modules-commonjs',
   ].concat(options.plugins)
 
-  // @decorator
-  if (options.decorators) {
-    plugins.push('transform-decorators-legacy')
+  if (options.es2015) {
+    presets.push('es2015')
   }
+  // default
+  if (!options.stage.includes('stage')) {
+    options.stage = 'stage-' + options.stage
+  }
+  presets.push(options.stage)
 
+  // needs to be before flowRuntime
   if (options.async) {
     plugins.push('transform-runtime')
     plugins.push('transform-regenerator')
@@ -54,23 +53,34 @@ module.exports = function(options) {
     plugins.push('async-to-promises')
   }
 
-
-  // default
-  if (!options.stage.includes('stage')) {
-    options.stage = 'stage-' + options.stage
+  if (options.flowRuntime) {
+    if (typeof options.flowRuntime === 'object') {
+      plugins.push(['flow-runtime', {
+        'assert': options.flowRuntime.assert,
+        'annotate': options.flowRuntime.annotate,
+      }])
+    } else {
+      plugins.push(['flow-runtime', {
+        'assert': false,
+        'annotate': true,
+      }])
+    }
   }
-  presets.push(options.stage)
-
   if (options.stripFlow) {
     plugins.push('transform-flow-strip-types')
   }
-  if (options.flowRuntime) {
-    // defaults
-    // {
-    //   'assert': true,
-    //   'decorate': true,
-    // }
-    plugins.push('flow-runtime')
+
+  if (options.classProperties) {
+    // es7 props
+    plugins.push('transform-class-properties')
+  }
+  if (options.objectSpread) {
+    // {...props}
+    plugins.push('transform-object-rest-spread')
+  }
+  // @decorator
+  if (options.decorators) {
+    plugins.push('transform-decorators-legacy')
   }
 
   if (options.moduleExports) {
@@ -84,7 +94,6 @@ module.exports = function(options) {
   if (options.reactjsx) {
     plugins.push('transform-react-jsx')
   }
-
   if (options.hot) {
     plugins.push('react-hot-loader/babel')
     presets.push('react-hmre')

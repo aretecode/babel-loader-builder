@@ -60,4 +60,5 @@ var defaults = {
 - [ ] show required installations if some are missing
 - [ ] if they are missing, write out a line that shows the installation npm i command
 - [ ] stringify the object queries such as inferno for usage as a string
+- [ ] show if some options require being objects (if ^ cannot be strings)
 - [ ] just loop instead of Object.assign, for compatibility, or use polyfill but that seems like overkill
