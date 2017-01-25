@@ -1,9 +1,12 @@
+[![npm
+version](https://badge.fury.io/js/babel-loader-builder.svg)](https://badge.fury.io/js/babel-loader-builder)
+
 # purpose
 an easy string or object babel loader
 
 # installation
 ```
-npm i --save-dev babel-loader-builder
+npm i babel-loader-builder --save-dev
 ```
 
 # usage
@@ -43,6 +46,7 @@ loaders: [
 ## defaults
 ```
 var defaults = {
+  es2015: true,
   hot: false,
   react: false,
   asObject: false,
@@ -52,7 +56,13 @@ var defaults = {
   babili: false,
   moduleExports: true,
   inferno: false,
-  stage: '0'
+  async: true,
+  decorators: true,
+  classProperties: true,
+  objectSpread: true,
+  stage: '0',
+  plugins: [],
+  presets: [],
 }
 ```
 
