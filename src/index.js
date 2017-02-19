@@ -4,10 +4,13 @@
  */
 module.exports = function(options) {
   var defaults = {
+    latest: false,
     es2015: true,
     hot: false,
     react: false,
+    reactjsx: false,
     asObject: false,
+    stringify: false,
     production: false,
     babelrc: false,
     cacheDirectory: true,
@@ -18,6 +21,8 @@ module.exports = function(options) {
     decorators: true,
     classProperties: true,
     objectSpread: true,
+    sourceMaps: true,
+    alias: false,
     stage: '0',
     plugins: [],
     presets: [],
@@ -34,12 +39,16 @@ module.exports = function(options) {
     // 'transform-es2015-modules-commonjs',
   ].concat(options.plugins)
 
-  if (options.es2015) {
-    presets.push('es2015')
-  }
-  // default
-  if (!options.stage.includes('stage')) {
-    options.stage = 'stage-' + options.stage
+  if (options.latest) {
+    presets.push('latest')
+  } else {
+    if (options.es2015) {
+      presets.push('es2015')
+    }
+    // default
+    if (!options.stage.includes('stage')) {
+      options.stage = 'stage-' + options.stage
+    }
   }
   presets.push(options.stage)
 
@@ -106,26 +115,59 @@ module.exports = function(options) {
 
   // @TODO: inferno & inferno-compat
   if (options.inferno) {
-    // presets.push('inferno')
-    plugins.push('inferno')
-    plugins.push(['module-resolver', {
+    var inferno = 'inferno-compat'
+    var resolveInferno = {
       'root': ['.'],
       'alias': {
-        'react': 'inferno-compat',
-        'react-dom': 'inferno-compat',
-        'react-dom/server': 'inferno-compat',
-        'inferno': 'inferno-compat',
+        'react': inferno,
+        'react-dom': inferno,
+        'react-dom/server': inferno,
+        'inferno': inferno,
       },
-    }])
+    }
+
+    if (options.inferno.compat === false) {
+      inferno = 'inferno'
+    }
+    if (options.inferno.import) {
+      resolveInferno.import = true
+    }
+
+    plugins.push('inferno')
+    plugins.push(['module-resolver', resolveInferno])
   }
 
-  if (options.asObject) {
+  if (options.alias) {
+    plugins.push(['babel-plugin-webpack-aliases', {'config': options.alias}])
+  }
+
+  var prefix = ''
+
+  if (!options.asObject && !options.stringify) {
+    // because not all options can be put in the ,loaderformat[]=
+    for (var i = 0; i < plugins.length; i++) {
+      if (typeof plugins[i] !== 'string') {
+        prefix = 'babel-loader?'
+        options.stringify = true
+        break
+      }
+    }
+  }
+
+  if (options.asObject || options.stringify) {
     var asObject = {plugins, presets}
     if (!options.babelrc) {
       asObject.babelrc = false
     }
     if (options.cacheDirectory) {
       asObject.cacheDirectory = true
+    }
+    if (options.sourceMaps) {
+      asObject.sourceMaps = true
+    }
+
+    if (options.stringify) {
+      return prefix + JSON.stringify(asObject)
     }
     return asObject
   }

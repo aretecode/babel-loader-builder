@@ -45,10 +45,32 @@ function compareAsObject() {
     ],
     presets: ['es2015', 'stage-0'],
     babelrc: false,
-    cacheDirectory: true
+    cacheDirectory: true,
+    sourceMaps: true,
   }
-
   compareObjectValues(defaultLoaderAsObject, expectDefaultLoaderAsObject)
 }
 
+function compareStringifiedToStringifiedObj() {
+  var asObj = builder({asObject: true})
+  var objToStr = JSON.stringify(asObj)
+
+  var asStr = builder({stringify: true})
+  var strToObj = JSON.parse(asStr)
+
+  compareObjectValues(asObj, strToObj)
+  console.assert(asStr == objToStr, 'object to string, string to object')
+}
+
+function returnsStringIfOptionsRequire() {
+  var loader = builder({inferno: true})
+  var split = loader.split('?')
+  console.assert(split.length === 2, 'has babel-loader?query')
+  console.assert(split[1] === 'babel-loader', 'first split is `babel-loader`')
+  console.assert(typeof JSON.parse(split[2]) === 'object', 'second part can be parsed')
+}
+
+
+compareAsObject()
+compareStringifiedToStringifiedObj()
 console.log('all good, eh!')
